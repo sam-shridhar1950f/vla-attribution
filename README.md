@@ -48,7 +48,7 @@ teleop data), with two scenes each.
 The two policies depend on seemingly
 different components:
 
-- **pi05_libero index on its wrist-camera.** The
+- **pi05_libero indexes on its wrist-camera.** The
   wrist view carries almost all of the signal (dropping it ≈ dropping both
   cameras), the exterior view adds little.
 - **pi05_droid spreads its reliance.** No single input dominates; it uses
