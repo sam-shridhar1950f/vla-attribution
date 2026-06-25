@@ -2,10 +2,9 @@
 
 A small probe that measures which inputs a VLA policy uses to decide its next action.
 
-VLA policies take several inputs, like camera
-views, the robot's proprioceptive state, and a language instruction. From these, it emits an action. Which of those inputs the policy *relies on* is not visible from the loss curve or the benchmark score. This tool investigates that, on any
-[openpi](https://github.com/Physical-Intelligence/openpi) checkpoint, in a few
-minutes on a single GPU.
+VLA policies take several inputs. Camera
+views, a robot's proprioceptive state, and a language instruction are some examples. From these, it emits an action. Which of those inputs the policy *relies on* is not visible from the loss curve or a benchmark score. This tool investigates that, on
+[openpi](https://github.com/Physical-Intelligence/openpi) checkpoints.
 
 ## Method
 
@@ -13,7 +12,7 @@ An action is a chunk of numbers. π0.5 predicts several future timesteps of robo
 command at once (for these checkpoints, a 10×7 grid). The probe measures which
 inputs the policy uses to produce that grid:
 
-1. **Baseline.** Run the policy on a real observation and record the action grid it
+1. **Baseline.** Run the policy on an observation and record the action grid it
    predicts. The action head is a stochastic flow-matching sampler, so the same
    observation is run against a fixed bank of noise draws.
 2. **Break one input.** Re-run with a single input corrupted, on the *same* noise
@@ -25,13 +24,13 @@ inputs the policy uses to produce that grid:
 3. **Measure the change.** Take the root-mean-square difference between the
    perturbed action grid and the baseline grid (how far the predicted numbers
    moved), then divide it by how far the grid moves on its own when only the noise
-   draw changes. That denominator is the policy's **sampling-noise floor**.
+   draw changes. That denominator is the policy's sampling-noise floor.
 
 So every number is a multiple of the policy's own randomness:
 
 - **about 1**: breaking the input moved the action no more than re-sampling the
   head would, so the policy barely uses it.
-- **large** (for example 57): the action moved far beyond the policy's own noise,
+- **large** (ex. 57): the action moved far beyond the policy's own noise,
   so the policy leans on that input heavily.
 - **0**: the action did not change at all, so the input is ignored.
 
@@ -62,12 +61,12 @@ barely mattered; 0 means ignored.**
 ¹ DROID's released state is end-effector pose, not the joint angles pi05_droid
 expects, so its proprioception numbers are suggestive rather than exact.
 
-The two policies depend on seemingly
+The two policies depend on visibly
 different components:
 
 - **pi05_libero indexes on its wrist-camera.** The
   wrist view carries almost all of the signal (dropping it ≈ dropping both
-  cameras), the exterior view adds little.
+  cameras), the exterior view adds comparatively less.
 - **pi05_droid spreads its reliance.** No single input dominates; it uses
   proprioception and degrades gracefully when one camera is removed.
 - **Both policies barely condition on instruction.** Swapping the task for a different real one moves the action about as much as sampling noise.
@@ -90,7 +89,7 @@ The first four rows read as before (multiples of sampling noise). The last row i
 the raw noise floor itself, the denominator the others are divided by, where a
 higher value means the policy's actions are more erratic on those inputs.
 
-On real out-of-distribution frames, pi05_libero still over-weights the wrist. Its state-blindness is
+On out-of-distribution frames, pi05_libero still over-weights the wrist. Its state-blindness is resultingly
 structural, not a property of clean sim images. With no fallback, it just becomes
 erratic (its sampling-noise floor rises 6×). pi05_droid does the opposite: on
 unfamiliar sim frames it leans *more* on proprioception and trusts the cameras
@@ -100,10 +99,10 @@ less, which is in practice graceful degradation under a distribution shift.
 
 ## Why this is useful
 
-A benchmark score tells you a policy works. It does not tell you what the policy is
+More broadly, a benchmark score tells you a policy works. It does not tell you what the policy is
 using to work, and that is what decides whether the score holds up outside the
 benchmark. A policy can score well by leaning on one easy signal and ignoring the
-rest. That is fine on a clean sim benchmark, but in the real world, where
+rest. That is fine on a sim benchmark, but in the real world, where
 that sensors are noisy, it has nothing to fall back on. 
 
 Because it shows which sensors drive the policy, it signals where better data, labels, or sensor quality
