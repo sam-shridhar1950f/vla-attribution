@@ -9,22 +9,31 @@ minutes on a single GPU.
 
 ## Method
 
-For a trained policy and a bundle of observations:
+An action is a chunk of numbers. π0.5 predicts several future timesteps of robot
+command at once (for these checkpoints, a 10×7 grid). The probe measures which
+inputs the policy uses to produce that grid:
 
-1. Run the policy on each observation to get a baseline action chunk. The π0.5
-   action head is a stochastic flow-matching sampler, so each observation is run
-   against a fixed bank of noise draws.
-2. Perturb one input at a time. Blank a camera, zero or randomize the
-   proprioceptive state, swap/remove/scramble the instruction, and run again on
-   the same noise draws.
-3. Report the resulting change in the predicted action, **paired** on the noise
-   draw (so the only thing that varies is the input) and normalized by the
-   policy's own sampling spread.
+1. **Baseline.** Run the policy on a real observation and record the action grid it
+   predicts. The action head is a stochastic flow-matching sampler, so the same
+   observation is run against a fixed bank of noise draws.
+2. **Break one input.** Re-run with a single input corrupted, on the *same* noise
+   draws so nothing else changes:
+   - a camera replaced with a black image,
+   - the proprioceptive state set to zeros or to a random vector,
+   - the instruction removed, swapped for a different real task, or replaced with
+     gibberish.
+3. **Measure the change.** Take the root-mean-square difference between the
+   perturbed action grid and the baseline grid (how far the predicted numbers
+   moved), then divide it by how far the grid moves on its own when only the noise
+   draw changes. That denominator is the policy's **sampling-noise floor**.
 
-The unit is "how far the action moves relative to the model re-sampling its own
-head." A value near **1** means the input barely matters (indistinguishable from
-sampling noise); a **large** value means the policy leans heavily on it; **0**
-means it is ignored.
+So every number is a multiple of the policy's own randomness:
+
+- **about 1**: breaking the input moved the action no more than re-sampling the
+  head would, so the policy barely uses it.
+- **large** (for example 57): the action moved far beyond the policy's own noise,
+  so the policy leans on that input heavily.
+- **0**: the action did not change at all, so the input is ignored.
 
 ## Experiments on π0.5
 
@@ -34,7 +43,12 @@ teleop data), with two scenes each.
 
 ![libero vs droid](results/figures/libero_vs_droid.png)
 
-| perturbation | pi05_libero (sim) | pi05_droid (real) |
+Each row is an input that was broken; each column is a policy. A cell is how far
+that policy's action moved as a result, as a multiple of the policy's own sampling
+noise. **Higher means it relies on that input more; about 1 or below means it
+barely mattered; 0 means ignored.**
+
+| broken input | pi05_libero (sim) | pi05_droid (real) |
 | --- | ---: | ---: |
 | drop both cameras | 60× | 3.2× |
 | drop wrist camera | 57× | 1.7× |
@@ -44,6 +58,9 @@ teleop data), with two scenes each.
 | remove instruction | 2.9× | 2.3× |
 | swap instruction | 2.7× | 0.75× |
 | gibberish instruction | 2.4× | 2.3× |
+
+¹ DROID's released state is end-effector pose, not the joint angles pi05_droid
+expects, so its proprioception numbers are suggestive rather than exact.
 
 The two policies depend on seemingly
 different components:
@@ -68,6 +85,10 @@ Feeding each policy the *other* domain's frames keeps each observed behavior too
 | zero proprioception | 0.00× | 0.00× | 1.9× | 1.6× |
 | random proprioception | 0.00× | 0.00× | 3.5× | 1.4× |
 | sampling-noise floor | 0.023 | 0.137 | 0.075 | 0.162 |
+
+The first four rows read as before (multiples of sampling noise). The last row is
+the raw noise floor itself, the denominator the others are divided by, where a
+higher value means the policy's actions are more erratic on those inputs.
 
 On real out-of-distribution frames, pi05_libero still over-weights the wrist. Its state-blindness is
 structural, not a property of clean sim images. With no fallback, it just becomes
