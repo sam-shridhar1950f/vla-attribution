@@ -103,15 +103,10 @@ less, which is in practice graceful degradation under a distribution shift.
 A benchmark score tells you a policy works. It does not tell you what the policy is
 using to work, and that is what decides whether the score holds up outside the
 benchmark. A policy can score well by leaning on one easy signal and ignoring the
-rest. pi05_libero does this: it rides the wrist camera (57×) and is blind to its own
-arm state (0). That is fine on a clean sim benchmark, but in the real world, where
-that camera gets noisy or blocked, it has nothing to fall back on. The score hides
-that brittleness, and this probe shows it.
+rest. That is fine on a clean sim benchmark, but in the real world, where
+that sensors are noisy, it has nothing to fall back on. 
 
-It also catches inputs the policy is not using at all. A reading of 0 means the
-input is either data being collected for nothing or a channel the model never
-learned to use, both of which are worth knowing. And because it shows which sensors
-actually drive the policy, it tells you where better data, labels, or sensor quality
+Because it shows which sensors drive the policy, it signals where better data, labels, or sensor quality
 will pay off, and where they will not.
 
 ## Setup
