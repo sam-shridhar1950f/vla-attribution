@@ -42,7 +42,7 @@ teleop data), with two scenes each.
 
 ![sample frames](results/figures/sample_frames.png)
 
-The camera inputs for one frame each: LIBERO (top, simulation) and DROID (bottom,
+The camera inputs for one frame each: LIBERO (top, sim) and DROID (bottom,
 real), with exterior and wrist views.
 
 ![libero vs droid](results/figures/libero_vs_droid.png)
