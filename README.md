@@ -1,6 +1,6 @@
 # vla-attribution
 
-A small probe that measures **which inputs a VLA policy uses** to decide its next action.
+A small probe that measures which inputs a VLA policy uses to decide its next action.
 
 VLA policies take several inputs, like camera
 views, the robot's proprioceptive state, and a language instruction. From these, it emits an action. Which of those inputs the policy *relies on* is not visible from the loss curve or the benchmark score. This tool investigates that, on any
