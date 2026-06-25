@@ -126,6 +126,8 @@ either by hand, and a single score hides this. A cheap, automatic readout of wha
 checkpoint depends on is one way to watch it at scale, whether you are deciding which
 data to add or checking that a new policy did not quietly start cheating.
 
+Semi-inspired by this [blog](https://cursor.com/blog/real-time-rl-for-composer#real-time-rl-and-reward-hacking) by Cursor.
+
 ## Setup
 
 Local environment (data prep and plotting):
