@@ -40,6 +40,11 @@ Run on Physical Intelligence's two released π0.5 checkpoints, with frames
 from each one's matching dataset (LIBERO is a sim; DROID is real
 teleop data), with two scenes each.
 
+![sample frames](results/figures/sample_frames.png)
+
+The camera inputs for one frame each: LIBERO (top, simulation) and DROID (bottom,
+real), with exterior and wrist views.
+
 ![libero vs droid](results/figures/libero_vs_droid.png)
 
 Each row is an input that was broken; each column is a policy. A cell is how far
@@ -89,21 +94,19 @@ The first four rows read as before (multiples of sampling noise). The last row i
 the raw noise floor itself, the denominator the others are divided by, where a
 higher value means the policy's actions are more erratic on those inputs.
 
-On out-of-distribution frames, pi05_libero still over-weights the wrist. Its state-blindness is resultingly
-structural, not a property of clean sim images. With no fallback, it just becomes
+On out-of-distribution frames, pi05_libero still over-weights the wrist. Its state-blindness is structural,
+not a property of clean sim images. With no fallback, it just becomes
 erratic (its sampling-noise floor rises 6×). pi05_droid does the opposite: on
 unfamiliar sim frames it leans *more* on proprioception and trusts the cameras
 less, which is in practice graceful degradation under a distribution shift.
-
-![sample frames](results/figures/sample_frames.png)
 
 ## Why this is useful
 
 More broadly, a benchmark score tells you a policy works. It does not tell you what the policy is
 using to work, and that is what decides whether the score holds up outside the
 benchmark. A policy can score well by leaning on one easy signal and ignoring the
-rest. That is fine on a sim benchmark, but in the real world, where
-that sensors are noisy, it has nothing to fall back on. 
+rest. That is fine on a sim benchmark, but in the real world, where those
+sensors get noisy, it has nothing to fall back on. 
 
 Because it shows which sensors drive the policy, it signals where better data, labels, or sensor quality
 will pay off, and where they will not.
