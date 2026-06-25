@@ -111,6 +111,21 @@ sensors get noisy, it has nothing to fall back on.
 Because it shows which sensors drive the policy, it signals where better data, labels, or sensor quality
 will pay off, and where they will not.
 
+## Context
+
+A lot of the current work in robot learning is figuring out what good data actually
+is, and whether messy or imperfect data is still worth keeping. The usual proxies,
+like success rate or whether a clip looks clean, can be weak. This experiment is a
+small example of why. The clean simulation data is what let pi05_libero rely on a
+single camera, while the messier real data pushed pi05_droid to use everything. What
+mattered was whether the data forced the policy to learn the dependencies you want.
+
+That points at judging data by what a model trained on it ends up relying on, rather
+than by how clean the source looks. As datasets and models grow, you cannot inspect
+either by hand, and a single score hides this. A cheap, automatic readout of what a
+checkpoint depends on is one way to watch it at scale, whether you are deciding which
+data to add or checking that a new policy did not quietly start cheating.
+
 ## Setup
 
 Local environment (data prep and plotting):
