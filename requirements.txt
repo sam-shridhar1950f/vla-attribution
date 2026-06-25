@@ -1,0 +1,7 @@
+modal>=1.0
+numpy
+pyarrow
+pillow
+opencv-python-headless
+huggingface_hub
+matplotlib
